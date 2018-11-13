@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
 import './index.css';
 
 class Board extends React.Component {
@@ -40,3 +39,5 @@ class Board extends React.Component {
         );
     }
 }
+
+export default Board;
