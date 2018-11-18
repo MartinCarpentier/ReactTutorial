@@ -1,23 +1,27 @@
+import {
+    Component,
+    MouseEvent
+} from 'react';
 import * as React from 'react';
-import './index.css';
+import '../../index.css';
+import { Square } from '../square/square';
 
-class Board extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true,
-        };
-    }
+interface IBoardProps {
+    squares: string[];
+    onClick(ID: number): void;
+}
 
-    renderSquare(i) {
-        return <Square
-            value={this.props.squares[i]}
-            onClick={() => this.props.onClick(i)}
-        />;
-    }
+interface IBoardState {
+    squares: Array<string | undefined>;
+    xIsNext?: boolean
+}
 
-    render() {
+const initialState = { squares: Array<string>(9).fill(""), xIsNext: true }
+
+export class Board extends Component<IBoardProps, IBoardState> {
+    public readonly state: IBoardState = initialState;
+
+    public render() {
         return (
             <div>
                 <div className="board-row">
@@ -38,6 +42,15 @@ class Board extends React.Component {
             </div>
         );
     }
-}
 
-export default Board;
+    private renderSquare(i: number) {
+        return <Square
+            value={this.props.squares[i]}
+            onClick={this.handleClick(i)}
+        />;
+    }
+
+    private handleClick = (i: number) => (e: MouseEvent<HTMLElement>) => {
+        this.props.onClick(i);
+    }
+}

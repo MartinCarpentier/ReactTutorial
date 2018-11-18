@@ -1,71 +1,35 @@
+import { Component, MouseEvent } from 'react';
 import * as React from 'react';
-import './index.css';
-import Board from '../board/board';
+import '../../index.css';
+import { Board } from '../board/board';
 
-class Game extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            history: [
-                {
-                    squares: Array(9).fill(null)
-                }
-            ],
-            stepNumber: 0,
-            xIsNext: true
-        };
-    }
+interface IGameState {
+    history: IHistoryArray[];
+    stepNumber: number;
+    xIsNext: boolean;
+}
 
-    calculateWinner(squares) {
-        const lines = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 4, 8],
-            [2, 4, 6],
-        ];
-        for (let i = 0; i < lines.length; i++) {
-            const [a, b, c] = lines[i];
-            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-                return squares[a];
-            }
+interface IHistoryArray {
+    squares: string[];
+}
+
+const initialState: IGameState = {
+    history: [
+        {
+            squares: Array(9).fill("")
         }
-        return null;
-    }
+    ],
+    stepNumber: 0,
+    xIsNext: true
+};
 
-    handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const squares = current.squares.slice();
-        if (this.calculateWinner(squares) || squares[i]) {
-            return;
-        }
-        squares[i] = this.state.xIsNext ? "X" : "O";
-        this.setState({
-            history: history.concat([
-                {
-                    squares: squares
-                }
-            ]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-        });
-    }
+export class Game extends Component<{}, Partial<IGameState>> {
+    public state: IGameState = initialState;
 
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0
-        });
-    }
-
-    render() {
+    public render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
+        const winner = this.calculateWinner(current.squares);
 
         const moves = history.map((step, move) => {
             const desc = move ?
@@ -73,7 +37,7 @@ class Game extends React.Component {
                 'Go to game start';
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick={this.jumpTo(move)}>{desc}</button>
                 </li>
             );
         });
@@ -90,7 +54,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        onClick={i => this.handleClick(i)}
+                        onClick={this.handleClick}
                     />
                 </div>
                 <div className="game-info">
@@ -100,6 +64,56 @@ class Game extends React.Component {
             </div>
         );
     }
-}
 
-export default Game;
+    private calculateWinner(squares: string[]) {
+        const lines = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < lines.length; i++) {
+            const [a, b, c] = lines[i];
+            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                return squares[a];
+            }
+        }
+        return null;
+    }
+    
+    private handleClick = (i: number) => (e: MouseEvent<HTMLElement>) => {
+        // tslint:disable-next-line:no-console
+        console.log("Square is clicked");
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+        if (this.calculateWinner(squares) || squares[i]) {
+            return;
+        }
+        squares[i] = this.state.xIsNext ? "X" : "O";
+        // tslint:disable-next-line:no-shadowed-variable
+        this.setState((state) => ({
+            history: history.concat([
+                {
+                    squares
+                }
+            ]),
+            stepNumber: history.length,
+            xIsNext: !(state).xIsNext
+        }));
+    }
+
+    private jumpTo = (step: number) => (e: MouseEvent<HTMLElement>) => {
+        // tslint:disable-next-line:no-console
+        console.log("jumpto is clicked");
+        this.setState((current) => ({
+            stepNumber: step,
+            xIsNext: (step % 2) === 0
+        }));
+    }
+}
